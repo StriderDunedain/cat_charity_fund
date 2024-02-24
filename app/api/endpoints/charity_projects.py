@@ -7,20 +7,18 @@ from app.api.validators import (
     check_charity_project_exists,
     check_charity_project_full_amount,
     check_charity_project_has_money,
-    check_name_duplicate,
-    check_none_fields,
+    check_none_fields_and_name,
 )
 from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.crud.charity_project import charity_project_crud
-from app.models.donation import Donation
+from app.models import Donation
 from app.schemas.charity_project import (
     CharityProjectCreate,
     CharityProjectDB,
     CharityProjectUpdate
 )
 from app.services.investing import donating_logic
-
 
 charity_project_router = APIRouter()
 
@@ -57,15 +55,14 @@ async def get_charity_projects(
     '/',
     response_model=CharityProjectDB,
     response_model_exclude_none=True,
-    dependencies=[Depends(current_superuser),],
+    dependencies=[Depends(current_superuser)],
 )
 async def create_charity_project(
     charity_project: CharityProjectCreate,
     session: AsyncSession = Depends(get_async_session),
 ):
     """Создание нового Благотворительного Проекта. Superuser-only."""
-    await check_name_duplicate(charity_project.name, session)
-    check_none_fields(charity_project)
+    await check_none_fields_and_name(charity_project, session)
     new_charity_project = await charity_project_crud.create(charity_project, session)
     new_charity_project = await donating_logic(new_charity_project, Donation, session)
 
@@ -76,11 +73,11 @@ async def create_charity_project(
     '/{project_id}',
     response_model=CharityProjectDB,
     response_model_exclude_none=True,
-    dependencies=[Depends(current_superuser),],
+    dependencies=[Depends(current_superuser)],
 )
 async def partially_update_charity_project_by_id(
     project_id: int,
-    obj_in: CharityProjectUpdate,
+    project: CharityProjectUpdate,
     session: AsyncSession = Depends(get_async_session),
 ):
     """Частичное обновление Благотворительного Проекта. Superuser-only."""
@@ -89,20 +86,17 @@ async def partially_update_charity_project_by_id(
     )
     await check_charity_project_exists(project_id, session)
     check_charity_project_active(charity_project)
-    check_none_fields(obj_in)
+    await check_none_fields_and_name(project, session)
 
-    if obj_in.name:
-        await check_name_duplicate(obj_in.name, session)
-
-    if obj_in.full_amount is None:
+    if project.full_amount is None:
         charity_project = await charity_project_crud.update(
-            charity_project, obj_in, session
+            charity_project, project, session
         )
         return charity_project
 
-    check_charity_project_full_amount(obj_in, charity_project)
+    check_charity_project_full_amount(project, charity_project)
     charity_project = await charity_project_crud.update(
-        charity_project, obj_in, session
+        charity_project, project, session
     )
     charity_project = await donating_logic(charity_project, Donation, session)
 
@@ -113,7 +107,7 @@ async def partially_update_charity_project_by_id(
     '/{project_id}',
     response_model=CharityProjectDB,
     response_model_exclude_none=True,
-    dependencies=[Depends(current_superuser),],
+    dependencies=[Depends(current_superuser)],
 )
 async def delete_charity_project(
     project_id: int,

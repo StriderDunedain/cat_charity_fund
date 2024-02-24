@@ -61,12 +61,16 @@ def check_charity_project_full_amount(
     return
 
 
-def check_none_fields(project: CharityProject,) -> None:
+async def check_none_fields_and_name(
+    project: CharityProject,
+    session: AsyncSession,
+) -> None:
     if project.description == '' or project.name == '':
         raise HTTPException(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
             detail='Нельзя назначать такие пустые поля!',
         )
+    await check_name_duplicate(project.name, session)
     return
 
 

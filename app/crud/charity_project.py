@@ -3,8 +3,9 @@ from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .base import CRUDBase
 from app.models import CharityProject
+
+from .base import CRUDBase
 
 
 class CharityProjectCRUD(CRUDBase):
