@@ -40,4 +40,10 @@ python3 -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
+Сделать миграции:
+```alembic upgrade heads```
 
+Запустить приложение:
+```uvicorn app.main:app```
+
+Enjoy :)
