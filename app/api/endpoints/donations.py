@@ -22,8 +22,7 @@ async def get_user_donations(
     session: AsyncSession = Depends(get_async_session),
 ):
     """Какие пожертвования сделал определенный пользователь."""
-    donations = await donation_crud.get_donation_by_user(user, session)
-    return [donations]
+    return [await donation_crud.get_donation_by_user(user, session)]
 
 
 @donation_router.get(
@@ -35,8 +34,7 @@ async def get_all_donations(
     session: AsyncSession = Depends(get_async_session),
 ):
     """Какие пожертвования были сделаны вообще?"""
-    donations = await donation_crud.get_multi(session)
-    return donations
+    return await donation_crud.get_multi(session)
 
 
 @donation_router.post(

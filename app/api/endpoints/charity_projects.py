@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.validators import (
@@ -16,7 +15,7 @@ from app.models import Donation
 from app.schemas.charity_project import (
     CharityProjectCreate,
     CharityProjectDB,
-    CharityProjectUpdate
+    CharityProjectUpdate,
 )
 from app.services.investing import donating_logic
 
@@ -32,10 +31,7 @@ async def get_charity_projects(
     session: AsyncSession = Depends(get_async_session),
 ):
     """Посмотреть все Благотворительные Проекты."""
-    charity_projects = await charity_project_crud.get_multi(session)
-    for model in charity_projects:
-        print(model.fully_invested)
-    return charity_projects
+    return await charity_project_crud.get_multi(session)
 
 
 @charity_project_router.get(
@@ -47,8 +43,7 @@ async def get_charity_projects(
     session: AsyncSession = Depends(get_async_session),
 ):
     """Посмотреть Благотворительный Проект по id."""
-    charity_project = await charity_project_crud.get(project_id, session)
-    return charity_project
+    return await charity_project_crud.get(project_id, session)
 
 
 @charity_project_router.post(

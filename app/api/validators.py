@@ -52,7 +52,6 @@ def check_charity_project_full_amount(
     charity_project: CharityProject,
 ) -> None:
     """Для умных."""
-    print(obj_in.full_amount, charity_project.full_amount)
     if obj_in.full_amount < charity_project.invested_amount:
         raise HTTPException(
             detail='Нельзя менять сумму проекта в меньшую сторону',
